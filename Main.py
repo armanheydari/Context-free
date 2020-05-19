@@ -1,13 +1,19 @@
 class Main:
     from Grammer import Grammer
     n = int(input("How many variables? "))
-    grammer = {}
+    grammer = []
     for i in range(0, n):
-        temp = str(input()).split(' -> ')
-        if(len(temp)==2):
-            grammer[temp[0]] = temp[1].split('|')
+        temp1 = str(input()).split(' -> ')
+        if(len(temp1)==2):
+            temp2 = temp1[1].split('|')
         else:
-            grammer[temp[0]] = " "
+            temp1[0]=temp1[0].replace(' ->','')
+            temp2=[" "]
+        temp=[]
+        temp.append(temp1[0])
+        for j in temp2:
+            temp.append(j)
+        grammer.append(temp)
     myGrammer = Grammer(grammer)
     print("1=ChangeToGreibachForm\n2=ChangeToChomskyForm\n3=DeleteTrash\n4=IsGenerateByGrammer")
     n=input("What do you want?")
