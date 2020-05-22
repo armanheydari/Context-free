@@ -18,11 +18,14 @@ class Main:
     print("1=ChangeToGreibachForm\n2=ChangeToChomskyForm\n3=DeleteTrash\n4=IsGenerateByGrammer")
     n=input("What do you want?")
     if(n=='1'):
-        myGrammer.ChangeToGreibachForm
+        myGrammer.ChangeToGreibachForm()
+        print (myGrammer.grammer)
     if(n=='2'):
-        myGrammer.ChangeToChomskyForm
+        myGrammer.ChangeToChomskyForm()
+        print (myGrammer.grammer)
     if(n=='3'):
-        myGrammer.DeleteTrash
+        myGrammer.DeleteTrash()
+        print (myGrammer.grammer)
     if(n=='4'):
-        myGrammer.IsGenerateByGrammer
+        myGrammer.IsGenerateByGrammer()
 
