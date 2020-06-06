@@ -10,8 +10,48 @@ class Grammer:
             for j in i[1:len(i)]:
                 if self.isDeleteTrash == False and j.isupper() and not '<' in j[1:len(j)]:
                     self.isDeleteTrash = True
-        # check useless productions
-        
+        # check useless productions:
+        v = []
+        temp = True
+        v.append(self.grammer[0][0])
+        while temp and self.isDeleteTrash == False:
+            temp = False
+            for i in self.grammer:
+                for j in i[1:len(i)]:
+                    k = 0
+                    while k in range(0, len(j)):
+                        s = ""
+                        if j[k] == '<':
+                            while j[k] != '>':
+                                s = s+j[k]
+                                k = k+1
+                            s = s+'>'
+                            if not s in v:
+                                v.append(s)
+                                temp = True
+                        k = k+1
+        if self.isDeleteTrash == False:
+            for i in self.grammer:
+                if not i[0] in v:
+                    self.isDeleteTrash = True
+        if self.isDeleteTrash == False:
+            for i in self.grammer:
+                for j in i[1:len(i)]:
+                    if j.islower() and not j in v:
+                        v.append(i[0])
+        temp = True
+        while temp and self.isDeleteTrash == False:
+            temp = False
+            for i in self.grammer:
+                for j in v:
+                    for k in i[1:len(i)]:
+                        if j in k and not i[0] in v:
+                            v.append(i[0])
+                            temp = True
+        if self.isDeleteTrash == False:
+            for i in self.grammer:
+                if not i[0] in v:
+                    self.isDeleteTrash = True
         return self.isDeleteTrash
 
     def CheckChomsky(self):
@@ -35,9 +75,9 @@ class Grammer:
 
     def __init__(self, grammer):
         self.grammer = grammer
+        self.isDeleteTrash = self.CheckDelete()
         self.isChomskyForm = self.CheckChomsky()
         self.isGreibachNormalForm = self.CheckGreibach()
-        self.isDeleteTrash = self.CheckDelete()
 
     def ChangeToGreibachForm(self):
         pass
@@ -109,7 +149,72 @@ class Grammer:
                                     if not l in i:
                                         i.append(l)
             # delete useless productions
+            v = []
+            temp = True
+            v.append(self.grammer[0][0])
+            while temp:
+                temp = False
+                for i in self.grammer:
+                    for j in i[1:len(i)]:
+                        k = 0
+                        while k in range(0, len(j)):
+                            s = ""
+                            if j[k] == '<':
+                                while j[k] != '>':
+                                    s = s+j[k]
+                                    k = k+1
+                                s = s+'>'
+                                if not s in v:
+                                    v.append(s)
+                                    temp = True
+                            k = k+1
+            nonReachables = []
+            for i in self.grammer:
+                if not i[0] in v:
+                    nonReachables.append(i[0])
+            i = 0
+            while i in range(0, len(self.grammer)):
+                if self.grammer[i][0] in nonReachables:
+                    self.grammer.pop(i)
+                else:
+                    i = i+1
+            v = []
+            for i in self.grammer:
+                for j in i[1:len(i)]:
+                    if not i[0] in v and (j.islower() or j == ' '):
+                        v.append(i[0])
+            temp = True
+            while temp:
+                temp = False
+                for i in self.grammer:
+                    for j in v:
+                        for k in i[1:len(i)]:
+                            if j in k and not i[0] in v:
+                                v.append(i[0])
+                                temp = True
+            nonTerminals = []
+            for i in self.grammer:
+                if not i[0] in v:
+                    nonTerminals.append(i[0])
+            i = 0
+            while i in range(0, len(self.grammer)):
+                if self.grammer[i][0] in nonTerminals:
+                    self.grammer.pop(i)
+                else:
+                    i = i+1
+            for i in range(0, len(self.grammer)):
+                j = 0
+                temp = True
+                while j < len(self.grammer[i]):
+                    for k in nonTerminals:
+                        if k in self.grammer[i][j]:
+                            self.grammer[i].pop(j)
+                            temp = False
+                    if temp:
+                        j = j+1
 
+    def IsGenerateByGrammer(self,string):
+        if self.isChomskyForm:
+            
+        else:
 
-    def IsGenerateByGrammer(self):
-        pass
