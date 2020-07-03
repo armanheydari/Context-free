@@ -213,8 +213,19 @@ class Grammer:
                     if temp:
                         j = j+1
 
-    def IsGenerateByGrammer(self,string):
+    def IsGenerateByGrammer(self, s):
         if self.isChomskyForm:
+            dp = []
+            temp=[]
+            for i in range(0,len(s)):
+                temp.append('')
+                for j in self.grammer:
+                    if s[i] in j and not j[0] in temp[i]:
+                        temp[i] = temp[i]+','+j[0]
+                if len(temp[i]) > 0:
+                    temp[i] = temp[i][1:len(temp[i])]
+            dp.append(temp)
             
-        else:
 
+        else:
+            pass
