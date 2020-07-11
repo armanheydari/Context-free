@@ -8,7 +8,7 @@ class Grammer:
         # check unit productions
         for i in self.grammer:
             for j in i[1:len(i)]:
-                if self.isDeleteTrash == False and j.isupper() and not '<' in j[1:len(j)]:
+                if self.isDeleteTrash == False and j.count('<') > 0 and not '<' in j[1:len(j)]:
                     self.isDeleteTrash = True
         # check useless productions:
         v = []
@@ -37,7 +37,7 @@ class Grammer:
         if self.isDeleteTrash == False:
             for i in self.grammer:
                 for j in i[1:len(i)]:
-                    if j.islower() and not j in v:
+                    if j.count('<') == 0 and not j in v:
                         v.append(i[0])
         temp = True
         while temp and self.isDeleteTrash == False:
@@ -148,7 +148,6 @@ class Grammer:
                 j += 1
         return True
 
-
     def ChangeToChomskyForm(self):
         self.DeleteTrash()
         # change terminals to T variables
@@ -208,7 +207,7 @@ class Grammer:
             # delete unit productions:
             for i in self.grammer:
                 for j in i[1:len(i)]:
-                    if j.isupper() and not '<' in j[1:len(j)]:
+                    if j.count('>') > 0 and not '<' in j[1:len(j)]:
                         i.remove(j)
                         for k in self.grammer:
                             if(k[0] == j):
@@ -248,7 +247,7 @@ class Grammer:
             v = []
             for i in self.grammer:
                 for j in i[1:len(i)]:
-                    if not i[0] in v and (j.islower() or j == ' '):
+                    if not i[0] in v and (j.count('<') == 0 or j == ' '):
                         v.append(i[0])
             temp = True
             while temp:
@@ -291,35 +290,37 @@ class Grammer:
             while j != len(production):
                 k = 0
                 flag = True
-                while k != len(production[j]):
+                while k != len(production[j]) and flag:
                     if production[j][k] == '>' and k + 1 != len(production[j]):
                         if production[j][k+1] != '<':
-                            elinimate_index.append(k)
+                            elinimate_index.append(j)
                             elinimate_str.append(production[j])
-                        else:
-                            simple_index.append(k)
-                            simple_str.append(production[j])
-                    else:
-                        simple_index.append(k)
-                        simple_str.append(production[j])
+                            flag = False
                     k += 1
+                if flag:
+                    simple_index.append(j)
+                    simple_str.append(production[j])
+
                 j += 1
 
             if len(elinimate_index) > 0:
-                new_var = '<NEW_' + str(production[0]) + '>'
+                p = production[0][1:]
+                p = p[:-2]
+                new_var = '<NEW' + p + '>'
+
                 for j in range(len(simple_index)):
                     index = int(simple_index[j])
                     extra = simple_str[j]
                     extra = extra + new_var
-                    self.grammer[i][j] = extra
+                    self.grammer[i].append(extra)
 
-                new_variable = []
-                new_variable.append(new_var)
-                self.grammer[0].append(new_variable)
+                Empty = []
+                self.grammer.append(Empty)
+                self.grammer[len(self.grammer)-1].append(new_var)
                 for j in range(len(elinimate_index)):
                     extra = elinimate_str[j]
                     index = extra.index('>')
-                    extra = extra[:index+1] + new_var
+                    extra = extra[index+1:] + new_var
                     self.grammer[-1].append(extra)
                 self.grammer[-1].append('lamda')
 
@@ -327,48 +328,45 @@ class Grammer:
                     index = int(elinimate_index[j]) - j
                     self.grammer[i].pop(index)
 
-                self.DeleteTrash()
+        self.DeleteTrash()
 
     def IsGenerateByGrammer(self, s):
-        if self.isChomskyForm:
-            temp = s.split(' ')
-            str_length = len(temp)
-            r = len(self.grammer)
-            p = [[[False for i in range(r)] for j in range(
-                str_length)] for k in range(str_length)]
+        self.ChangeToChomskyForm()
+        temp = s.split(' ')
+        str_length = len(temp)
+        r = len(self.grammer)
+        p = [[[False for i in range(r)] for j in range(str_length)]
+             for k in range(str_length)]
 
-            for index in range(str_length):
-                for i in self.grammer:
-                    for value in self.FindValues(i[0]):
-                        if value.count('<') == 0 and temp[index] == value:
-                            p[0][index][self.grammer.index(i)] = True
-                            break
+        for index in range(str_length):
+            for i in self.grammer:
+                for value in self.FindValues(i[0]):
+                    if temp[index] == value:
+                        p[0][index][self.grammer.index(i)] = True
+                        break
 
-            for length_span in range(1, str_length):
-                for start_span in range(str_length - length_span):
-                    for partition_span in range(length_span):
-                        for i in self.grammer:
-                            for value in self.FindValues(i):
-                                if value.count('<') == 2:
-                                    index = value.index('>')
-                                    variable_1 = value[:index+1]
-                                    variable_2 = value[index+1:]
+        for length_span in range(1, str_length):
+            for start_span in range(str_length - length_span):
+                for partition_span in range(length_span):
+                    for i in self.grammer:
+                        for value in self.FindValues(i[0]):
+                            if value.count('<') == 2:
+                                index = value.index('>')
+                                variable_1 = value[:index+1]
+                                variable_2 = value[index+1:]
 
-                                    for j in self.grammer:
-                                        if j[0] == variable_1:
-                                            x = self.grammer.index(j)
-                                            break
+                                for j in self.grammer:
+                                    if j[0] == variable_1:
+                                        x = self.grammer.index(j)
+                                        break
 
-                                    for j in self.grammer:
-                                        if j[0] == variable_2:
-                                            y = self.grammer.index(j)
-                                            break
+                                for j in self.grammer:
+                                    if j[0] == variable_2:
+                                        y = self.grammer.index(j)
+                                        break
 
-                                    if p[partition_span][start_span][x] and p[length_span-partition_span-1][start_span+partition_span+1][y]:
-                                        p[length_span][start_span][self.grammer.index(
-                                            i)] = True
+                                if p[partition_span][start_span][x] and p[length_span-partition_span-1][start_span+partition_span+1][y]:
+                                    p[length_span][start_span][self.grammer.index(
+                                        i)] = True
 
-            return p[str_length-1][0][0]
-
-        else:
-            pass
+        return p[str_length-1][0][0]
